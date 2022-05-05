@@ -10,13 +10,18 @@ import { Drawer as MUIDrawer,
     Divider,
     Button,
     CssBaseline,
-    Box 
+    Box,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { ChevronRight, ChevronLeft } from '@mui/icons-material'
+import { ChevronRight, ChevronLeft } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { theme } from '../../Theme/themes'
-import { DataTable } from '../../components'
+import { theme } from '../../Theme/themes';
+import { DataTable, MarvelForm } from '../../components';
 
 
 const drawerWidth = 240;
@@ -82,7 +87,7 @@ const myStyles = {
       display: 'flex',
     },
     toolbarButton: {
-      marginLeft: 0,
+      marginLeft: "auto",
       backgroundColor: theme.palette.primary.contrastText,
       "&:hover": {
           color : 'white',
@@ -94,13 +99,23 @@ const myStyles = {
 export const Dashboard = () => {
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
 
     const handleDrawerOpen = () => {
         setOpen(true);
+        console.log(`open is currently: ${open}`)
     }
 
     const handleDrawerClose = () => {
         setOpen(false);
+        console.log(`open is currently: ${open}`)
+    }
+
+    const handleDialogOpen = () => {
+      setDialogOpen(true);
+    }
+    const handleDialogClose = () => {
+      setDialogOpen(false);
     }
 
     const itemsList = [
@@ -130,7 +145,18 @@ export const Dashboard = () => {
                             <MenuIcon />
                     </IconButton>
                     <Typography variant = 'h6' noWrap> Dashboard 📊 </Typography>
-                    <Button sx={myStyles.toolbarButton}>Create New Character</Button>
+                    <Button sx={myStyles.toolbarButton} onClick={handleDialogOpen}>Create New Character</Button>
+                    {/* Dialog Popup HTML */}
+                    <Dialog open={dialogOpen} onClose={handleDialogClose} aria-labelledby = 'form-dialog-title'>
+                      <DialogTitle id="form-dialog-title">Add A New Hero</DialogTitle>
+                      <DialogContent>
+                        <DialogContentText>Fill the entire form to create a Hero.</DialogContentText>
+                        <MarvelForm />
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={handleDialogClose} color='warning'>Cancel</Button>
+                      </DialogActions>
+                    </Dialog>
                 </Toolbar>
             </AppBar>
             <MUIDrawer
@@ -157,9 +183,9 @@ export const Dashboard = () => {
                     </List>
             </MUIDrawer>
             <Box sx={myStyles.content}>
-                        <h1> Hello World until Data shows up</h1>
-                        {/* Data Table Component will be placed here */}
-                        <DataTable />
+
+                <DataTable />
+
             </Box>
 
             

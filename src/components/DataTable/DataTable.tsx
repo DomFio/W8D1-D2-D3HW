@@ -1,17 +1,28 @@
-import React from 'react';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import React, {useState} from 'react';
+import { DataGrid, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
+import {serverCalls} from '../../api';
+import { useGetData } from '../../custom-hooks';
+import {
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+  Dialog
+} from '@mui/material';
+import { MarvelForm } from '../../components';
 
 const columns: GridColDef[] = [
-  { field: 'id', headerName: 'ID', width: 90 },
+  { field: 'id', headerName: 'ID', flex: 1, minWidth: 130 },
   {
-    field: 'firstName',
-    headerName: 'First name',
+    field: 'name',
+    headerName: 'Hero',
     width: 150,
     editable: true,
   },
   {
-    field: 'lastName',
-    headerName: 'Last name',
+    field: 'villans',
+    headerName: 'Villains',
     width: 150,
     editable: true,
   },
@@ -23,41 +34,86 @@ const columns: GridColDef[] = [
     editable: true,
   },
   {
-    field: 'fullName',
-    headerName: 'Full name',
+    field: 'super_power',
+    headerName: 'Super Power',
     description: 'This column has a value getter and is not sortable.',
     sortable: false,
     width: 160,
-    valueGetter: (params: GridValueGetterParams) =>
-      `${params.row.firstName || ''} ${params.row.lastName || ''}`,
+  },
+  {
+    field: 'origin_summary',
+    headerName: 'Origin',
+    type: 'number',
+    width: 110,
+    editable: true,
+  },
+  {
+    field: 'weakness',
+    headerName: 'Weakness',
+    type: 'number',
+    width: 110,
+    editable: true,
+  },
+  {
+    field: 'movies',
+    headerName: 'Movies',
+    type: 'number',
+    width: 110,
+    editable: true,
   },
 ];
 
-const rows = [
-  { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-  { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-  { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-  { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-  { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-  { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-  { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-  { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-  { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-];
-
+interface gridData{
+  data:{
+    id?:string;
+  }
+}
 
 export const DataTable = () => {
+  let { marvelData, getData } = useGetData();
+  let [open, setOpen] = useState(false);
+  let [gridData, setData] = useState<GridSelectionModel>([])
+
+  let handleOpen = () =>{
+    setOpen(true);
+  }
+  let handleClose = () =>{
+    setOpen(false);
+  }
+
+  let deleteData = async () =>{
+    await serverCalls.delete(`${gridData[0]}`)
+    getData();
+  }
+
+  console.log(gridData) //A list of id's from checked rows
+
     return (
       <div style={{ height: 400, width: '100%' }}>
           <h2>Drones In Inventory</h2>
         <DataGrid
-          rows={rows}
+          rows={marvelData}
           columns={columns}
           pageSize={5}
           rowsPerPageOptions={[5]}
           checkboxSelection
           disableSelectionOnClick
+          onSelectionModelChange={newSelectionModel =>setData(newSelectionModel)}
+          {...marvelData}
         />
+        <Button onClick={handleOpen} color='primary'>Update</Button>
+        <Button onClick={deleteData} color='warning'>Delete</Button>
+        <Dialog open={open} onClose={handleClose} aria-labelledby='form-dialog-title'>
+          <DialogTitle id="form-dialog-title">Update A Hero</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Updating Marvel ID: {gridData[0]}</DialogContentText>
+            <MarvelForm id={`${gridData[0]}`} />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+          </DialogActions>
+        </Dialog>
+
       </div>
     );
   }
